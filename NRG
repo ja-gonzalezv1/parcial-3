@@ -1,0 +1,46 @@
+
+import numpy as np
+
+x_ = np.linspace(0,5,10)
+y_ = np.linspace(0,5,10)
+
+def f1(x, y):
+    return x**2 + y**2
+
+def f2(x, y):
+    return (x -1)/y
+
+fs = np.array([f1, f2])
+
+
+def Jacobiano (fs, x, y, h= 0.001):
+    J = np.zeros((len(fs), len(fs)))
+    for i in range (J.shape[0]):
+        J[i][0] = (fs[i](x + h, y) - fs[i](x - h, y))/(2*h)
+        J[i][1] = (fs[i](x, y + h) - fs[i](x, y - h))/(2*h)
+    return J
+
+def Evaluar (M, x):
+    Res = np.zeros((M.shape[0], M.shape[1]))
+    for i in range(M.shape[0]):
+        for j in range(M.shape[1]):
+            Res[i][j] = M[i][j](x[0], x[1])
+    return Res
+        
+
+def NewtonRaphsonG (fs, x, tolerancia= 1e-9):
+    x_ = x[0]
+    y_ = x[1]
+    J = Jacobiano(fs, x_, y_)
+    Ji = np.linalg.inv(J)
+    dif = 1
+    while (dif > tolerancia).all() == True:
+        j = Evaluar(Ji, x)
+        f = Evaluar(fs, x)
+        x = x - np.dot(j, f)
+        x1 = x
+        j1 = Evaluar(Ji, x1)
+        f1 = Evaluar(fs, x1)
+        x2 = x1 - np.dot(j1, f1)
+        dif = abs(x2) - abs(x1)
+    return x
