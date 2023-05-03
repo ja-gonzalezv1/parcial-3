@@ -1,0 +1,45 @@
+import numpy as np
+
+
+def Jacobiano (fs, x, y, h= 0.001):
+    J = np.zeros((len(fs), len(fs)))
+    for i in range (J.shape[0]):
+        J[i][0] = (fs[i](x + h, y) - fs[i](x - h, y))/(2*h)
+        J[i][1] = (fs[i](x, y + h) - fs[i](x, y - h))/(2*h)
+    return J
+
+def Evaluar (M, x):
+    Res = np.zeros((M.shape[0]))
+    for i in range(M.shape[0]):
+        Res[i] = M[i](x[0], x[1])
+    return Res
+        
+
+def NewtonRaphsonG (fs, x, tolerancia= 1e-9):
+    dif = np.array([1,1])
+    while all( d > tolerancia for d in dif ) == True:
+        j = Jacobiano(fs, x[0], x[1])
+        ji = np.linalg.inv(j)
+        f = Evaluar(fs, x)
+        x = x - np.dot(ji, f)
+        x1 = x
+        j1 = Jacobiano(fs, x1[0], x1[1])
+        ji1 = np.linalg.inv(j1)
+        f1 = Evaluar(fs, x1)
+        x2 = x1 - np.dot(ji1, f1)
+        dif = abs(x2) - abs(x1)
+    return x
+
+
+def f1(x, y):
+    return 2*(x**2) - 3*y
+
+def f2(x, y):
+    return x**5 + 5*(y**2)
+
+fs = np.array([f1, f2])
+x = np.array([-1,-1])
+
+print(NewtonRaphsonG(fs, x))
+
+# https://www.math.usm.edu/lambers/mat419/lecture9.pdf
